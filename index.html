@@ -3,141 +3,202 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CheckList Manager</title>
+  <title>Mes Taches</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #0a0e17; color: #e4e9f2; min-height: 100vh; }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      min-height: 100vh;
+    }
 
     /* ===== LOGIN ===== */
     .login-page {
       display: flex; justify-content: center; align-items: center; min-height: 100vh;
-      background: linear-gradient(135deg, #0984e3, #6c5ce7);
+      background: #1a1a2e;
     }
     .login-card {
-      background: #131a2b; border-radius: 16px; padding: 40px; width: 100%; max-width: 400px;
-      margin: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      background: #222244; border-radius: 20px; padding: 40px; width: 100%; max-width: 400px;
+      margin: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
     }
-    .login-card h1 { text-align: center; font-size: 2rem; margin-bottom: 8px; color: #74b9ff; }
-    .login-card .subtitle { text-align: center; color: #8b95a8; margin-bottom: 28px; }
-    .login-error { background: #d63031; color: white; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px; display: none; }
+    .login-card h1 { text-align: center; font-size: 1.8rem; margin-bottom: 6px; }
+    .login-card .subtitle { text-align: center; color: #8888aa; margin-bottom: 28px; font-size: 0.9rem; }
+    .login-error { background: #e74c6f; color: white; padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 16px; display: none; text-align: center; }
     .login-error.show { display: block; }
 
     /* ===== FORMS ===== */
     .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; color: #8b95a8; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; color: #8888aa; }
     input, textarea, select {
-      width: 100%; padding: 12px 16px; border: 2px solid #1e2d4a; border-radius: 8px;
-      font-size: 0.95rem; background: #0a0e17; color: #e4e9f2; transition: border 0.2s;
+      width: 100%; padding: 14px 18px; border: none; border-radius: 14px;
+      font-size: 0.95rem; background: #2a2a4a; color: #eee; transition: all 0.2s;
+      font-family: inherit;
     }
-    input:focus, textarea:focus, select:focus { outline: none; border-color: #0984e3; }
-    select { cursor: pointer; }
+    input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 2px #e74c6f; }
+    input::placeholder { color: #666688; }
 
     /* ===== BUTTONS ===== */
     .btn {
-      padding: 10px 20px; border: none; border-radius: 8px; font-size: 0.9rem;
-      font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex;
-      align-items: center; gap: 6px;
+      padding: 12px 24px; border: none; border-radius: 14px; font-size: 0.9rem;
+      font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit;
     }
-    .btn:hover { transform: translateY(-1px); }
-    .btn-primary { background: #0984e3; color: white; width: 100%; justify-content: center; padding: 14px; font-size: 1rem; }
-    .btn-primary:hover { background: #0773c7; }
+    .btn:hover { transform: translateY(-1px); opacity: 0.9; }
+    .btn-primary { background: linear-gradient(135deg, #e74c6f, #c94b8c); color: white; width: 100%; font-size: 1rem; }
     .btn-green { background: #00b894; color: white; }
-    .btn-green:hover { background: #00a381; }
-    .btn-red { background: #d63031; color: white; }
-    .btn-red:hover { background: #b71c1c; }
-    .btn-outline { background: transparent; border: 1px solid #1e2d4a; color: #8b95a8; }
-    .btn-outline:hover { border-color: #0984e3; color: #0984e3; }
-    .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
-
-    /* ===== NAVBAR ===== */
-    .navbar {
-      background: #131a2b; border-bottom: 1px solid #1e2d4a; padding: 14px 24px;
-      display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+    .btn-red { background: #e74c6f; color: white; }
+    .btn-ghost { background: transparent; color: #8888aa; padding: 8px 16px; }
+    .btn-ghost:hover { color: #e74c6f; }
+    .btn-sm { padding: 8px 16px; font-size: 0.8rem; }
+    .btn-icon {
+      width: 44px; height: 44px; border-radius: 14px; display: flex;
+      align-items: center; justify-content: center; padding: 0; font-size: 1.4rem;
     }
-    .navbar-brand { font-size: 1.3rem; font-weight: 700; color: #74b9ff; text-decoration: none; }
-    .navbar-right { display: flex; align-items: center; gap: 10px; }
-    .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
-    .badge-admin { background: #6c5ce7; color: white; }
+
+    /* ===== MAIN CONTAINER ===== */
+    .app-container {
+      max-width: 520px; margin: 0 auto; padding: 30px 20px; min-height: 100vh;
+    }
+
+    /* ===== HEADER ===== */
+    .app-header {
+      display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;
+    }
+    .app-header h1 { font-size: 1.6rem; font-weight: 700; }
+    .app-header .date { color: #8888aa; font-size: 0.85rem; margin-top: 4px; }
+    .header-icon { font-size: 1.8rem; margin-right: 10px; }
+
+    /* ===== STATS ===== */
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .stat-card {
+      background: #222244; border-radius: 16px; padding: 16px 20px; text-align: center;
+      border: 1px solid #2a2a4a;
+    }
+    .stat-number { font-size: 1.8rem; font-weight: 700; }
+    .stat-number.todo { color: #e74c6f; }
+    .stat-number.done { color: #00b894; }
+    .stat-label { font-size: 0.8rem; color: #8888aa; margin-top: 2px; }
+
+    /* ===== ADD TASK ===== */
+    .add-row {
+      display: flex; gap: 10px; margin-bottom: 16px;
+    }
+    .add-row input {
+      flex: 1; background: #222244; border: 1px solid #2a2a4a;
+    }
+    .add-btn {
+      background: linear-gradient(135deg, #e74c6f, #c94b8c); color: white;
+      width: 48px; height: 48px; border-radius: 14px; border: none;
+      font-size: 1.6rem; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; transition: all 0.2s;
+    }
+    .add-btn:hover { transform: scale(1.05); }
+
+    /* ===== FILTER TABS ===== */
+    .filter-tabs {
+      display: flex; gap: 8px; margin-bottom: 16px;
+    }
+    .filter-tab {
+      padding: 8px 20px; border-radius: 20px; border: none; font-size: 0.8rem;
+      font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit;
+      background: #222244; color: #8888aa; border: 1px solid #2a2a4a;
+    }
+    .filter-tab.active {
+      background: linear-gradient(135deg, #e74c6f, #c94b8c); color: white; border-color: transparent;
+    }
+    .filter-tab:hover:not(.active) { border-color: #e74c6f; color: #e74c6f; }
+
+    /* ===== CHECKLIST SELECTOR ===== */
+    .checklist-selector {
+      display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px;
+    }
+    .cl-tab {
+      padding: 8px 18px; border-radius: 12px; border: 1px solid #2a2a4a;
+      background: #222244; color: #8888aa; font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; white-space: nowrap; font-family: inherit; transition: all 0.2s;
+    }
+    .cl-tab.active { background: #2a2a4a; color: #eee; border-color: #444466; }
+    .cl-tab:hover:not(.active) { border-color: #555577; }
+
+    /* ===== TASK ITEMS ===== */
+    .task-list { list-style: none; }
+    .task-item {
+      display: flex; align-items: center; gap: 14px; padding: 16px 18px;
+      background: #222244; border-radius: 14px; margin-bottom: 8px;
+      border: 1px solid #2a2a4a; transition: all 0.2s;
+    }
+    .task-item:hover { border-color: #444466; }
+    .task-item.checked { opacity: 0.5; }
+    .task-item.checked .task-text { text-decoration: line-through; color: #666688; }
+
+    .task-check {
+      width: 26px; height: 26px; border-radius: 50%; border: 2px solid #444466;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      flex-shrink: 0; transition: all 0.2s;
+    }
+    .task-item.checked .task-check {
+      background: #00b894; border-color: #00b894; color: white;
+    }
+    .task-check svg { width: 14px; height: 14px; }
+
+    .task-text { flex: 1; font-size: 0.95rem; }
+
+    .task-delete {
+      background: none; border: none; color: #444466; font-size: 1.2rem;
+      cursor: pointer; padding: 4px; transition: color 0.2s; line-height: 1;
+    }
+    .task-delete:hover { color: #e74c6f; }
+
+    /* ===== ADMIN ===== */
+    .admin-section { margin-bottom: 24px; }
+    .admin-section h2 { font-size: 1.1rem; margin-bottom: 12px; color: #ccc; }
+    .admin-card {
+      background: #222244; border-radius: 16px; padding: 20px; margin-bottom: 12px;
+      border: 1px solid #2a2a4a;
+    }
+    .admin-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid #2a2a4a;
+    }
+    .admin-row:last-child { border-bottom: none; }
+    .admin-actions { display: flex; gap: 6px; }
+
+    .badge { padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
     .badge-dev { background: #0984e3; color: white; }
     .badge-famille { background: #00b894; color: white; }
-
-    /* ===== LAYOUT ===== */
-    .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
-    .app-layout { display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
-    @media (max-width: 768px) { .app-layout { grid-template-columns: 1fr; } }
-
-    /* ===== SIDEBAR ===== */
-    .sidebar { background: #131a2b; border: 1px solid #1e2d4a; border-radius: 12px; padding: 16px; height: fit-content; position: sticky; top: 80px; }
-    .sidebar-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #8b95a8; margin-bottom: 10px; }
-    .sidebar-list { list-style: none; }
-    .sidebar-item {
-      padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 0.9rem;
-    }
-    .sidebar-item:hover { background: rgba(9,132,227,0.1); }
-    .sidebar-item.active { background: #0984e3; color: white; }
-    .item-count { font-size: 0.7rem; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px; }
-
-    /* ===== CHECKLIST ===== */
-    .checklist-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .checklist-header h2 { font-size: 1.4rem; }
-    .checklist-items { list-style: none; }
-    .checklist-item {
-      display: flex; align-items: center; gap: 12px; padding: 14px 16px;
-      background: #131a2b; border: 1px solid #1e2d4a; border-radius: 8px;
-      margin-bottom: 6px; cursor: pointer; transition: all 0.2s;
-    }
-    .checklist-item:hover { border-color: #0984e3; }
-    .checklist-item.checked { opacity: 0.5; }
-    .checklist-item.checked .item-text { text-decoration: line-through; }
-    .checkbox {
-      width: 22px; height: 22px; border: 2px solid #1e2d4a; border-radius: 6px;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.8rem;
-    }
-    .checklist-item.checked .checkbox { background: #0984e3; border-color: #0984e3; color: white; }
-    .item-text { flex: 1; }
-
-    /* ===== PROGRESS ===== */
-    .progress-bar { width: 100%; height: 6px; background: #1e2d4a; border-radius: 3px; margin: 12px 0 20px; overflow: hidden; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, #0984e3, #6c5ce7); border-radius: 3px; transition: width 0.3s; }
-
-    /* ===== CARDS ===== */
-    .card { background: #131a2b; border: 1px solid #1e2d4a; border-radius: 12px; padding: 24px; }
-    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #1e2d4a; }
-
-    /* ===== ADMIN GRID ===== */
-    .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    @media (max-width: 768px) { .admin-grid { grid-template-columns: 1fr; } }
-    .admin-table { width: 100%; border-collapse: collapse; }
-    .admin-table th, .admin-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #1e2d4a; font-size: 0.85rem; }
-    .admin-table th { color: #8b95a8; font-size: 0.75rem; text-transform: uppercase; }
+    .badge-both { background: #6c5ce7; color: white; }
+    .badge-admin { background: #e74c6f; color: white; }
 
     /* ===== MODAL ===== */
     .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none;
-      justify-content: center; align-items: center; z-index: 1000;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none;
+      justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px);
     }
     .modal-overlay.show { display: flex; }
-    .modal { background: #131a2b; border: 1px solid #1e2d4a; border-radius: 12px; padding: 32px; width: 100%; max-width: 500px; margin: 20px; }
+    .modal {
+      background: #222244; border-radius: 20px; padding: 30px; width: 100%;
+      max-width: 440px; margin: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
     .modal h2 { margin-bottom: 20px; font-size: 1.2rem; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 
-    /* ===== EMPTY ===== */
-    .empty-state { text-align: center; padding: 60px 20px; color: #8b95a8; }
-    .empty-state h3 { color: #e4e9f2; margin-bottom: 8px; }
-
     /* ===== TOAST ===== */
-    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 2000; }
-    .toast { background: #00b894; color: white; padding: 12px 20px; border-radius: 8px; margin-top: 8px; font-size: 0.9rem; animation: slideIn 0.3s; }
-    .toast.error { background: #d63031; }
-    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 2000; }
+    .toast {
+      background: #00b894; color: white; padding: 12px 24px; border-radius: 12px;
+      margin-top: 8px; font-size: 0.9rem; font-weight: 500;
+      animation: fadeUp 0.3s; text-align: center;
+    }
+    .toast.error { background: #e74c6f; }
+    @keyframes fadeUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-    /* ===== HIDDEN ===== */
     .hidden { display: none !important; }
 
-    /* ===== ADD ITEM INLINE ===== */
-    .add-item-row { display: flex; gap: 8px; margin-top: 12px; }
-    .add-item-row input { flex: 1; }
+    .logout-row { text-align: center; margin-top: 20px; }
+
+    .empty-msg { text-align: center; padding: 40px; color: #666688; }
   </style>
 </head>
 <body>
@@ -145,87 +206,117 @@
   <!-- ==================== LOGIN ==================== -->
   <div id="page-login" class="login-page">
     <div class="login-card">
-      <h1>&gt;_ CheckList</h1>
+      <h1>&#128203; Mes Taches</h1>
       <p class="subtitle">Entre ton code d'acces</p>
       <div id="login-error" class="login-error"></div>
       <form id="login-form">
         <div class="form-group">
-          <label>Code</label>
-          <input type="password" id="code" placeholder="Entre ton code..." required autofocus>
+          <input type="password" id="code" placeholder="Code d'acces..." required autofocus>
         </div>
         <button type="submit" class="btn btn-primary">Entrer</button>
       </form>
     </div>
   </div>
 
-  <!-- ==================== APP (Dev / Famille) ==================== -->
+  <!-- ==================== APP ==================== -->
   <div id="page-app" class="hidden">
-    <nav class="navbar">
-      <span class="navbar-brand">&gt;_ CheckList</span>
-      <div class="navbar-right">
+    <div class="app-container">
+      <!-- Header -->
+      <div class="app-header">
+        <div style="display:flex;align-items:center;">
+          <span class="header-icon">&#128203;</span>
+          <div>
+            <h1>Mes Taches</h1>
+            <div class="date" id="app-date"></div>
+          </div>
+        </div>
         <span id="app-badge" class="badge"></span>
-        <button class="btn btn-outline btn-sm" id="app-logout">Deconnexion</button>
       </div>
-    </nav>
-    <div class="container">
-      <div class="app-layout">
-        <aside class="sidebar">
-          <p class="sidebar-title" id="sidebar-title">Checklists</p>
-          <ul id="sidebar-list" class="sidebar-list"></ul>
-        </aside>
-        <main>
-          <div id="app-empty" class="empty-state hidden">
-            <h3>Aucune checklist</h3>
-            <p>Rien pour le moment.</p>
-          </div>
-          <div id="app-view" class="card hidden">
-            <div class="checklist-header">
-              <h2 id="app-title"></h2>
-              <span id="app-progress" style="color:#8b95a8;font-size:0.9rem;"></span>
-            </div>
-            <div class="progress-bar"><div id="app-progress-bar" class="progress-fill"></div></div>
-            <ul id="app-items" class="checklist-items"></ul>
-          </div>
-        </main>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-number todo" id="stat-todo">0</div>
+          <div class="stat-label">A faire</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number done" id="stat-done">0</div>
+          <div class="stat-label">Terminees</div>
+        </div>
+      </div>
+
+      <!-- Checklist selector (if multiple) -->
+      <div id="cl-selector" class="checklist-selector hidden"></div>
+
+      <!-- Add task -->
+      <div class="add-row">
+        <input type="text" id="add-input" placeholder="Ajouter une nouvelle tache...">
+        <button class="add-btn" id="add-btn">+</button>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">Toutes</button>
+        <button class="filter-tab" data-filter="todo">A faire</button>
+        <button class="filter-tab" data-filter="done">Terminees</button>
+      </div>
+
+      <!-- Tasks -->
+      <ul id="task-list" class="task-list"></ul>
+      <div id="app-empty" class="empty-msg hidden">Aucune tache.</div>
+
+      <!-- Logout -->
+      <div class="logout-row">
+        <button class="btn btn-ghost" id="app-logout">Deconnexion</button>
       </div>
     </div>
   </div>
 
   <!-- ==================== ADMIN ==================== -->
   <div id="page-admin" class="hidden">
-    <nav class="navbar">
-      <span class="navbar-brand">&gt;_ CheckList Admin</span>
-      <div class="navbar-right">
+    <div class="app-container">
+      <div class="app-header">
+        <div style="display:flex;align-items:center;">
+          <span class="header-icon">&#9881;</span>
+          <div>
+            <h1>Admin</h1>
+            <div class="date" id="admin-date"></div>
+          </div>
+        </div>
         <span class="badge badge-admin">Admin</span>
-        <button class="btn btn-outline btn-sm" id="admin-view-dev" onclick="switchView('dev')">Voir Dev</button>
-        <button class="btn btn-outline btn-sm" id="admin-view-famille" onclick="switchView('famille')">Voir Famille</button>
-        <button class="btn btn-outline btn-sm" id="admin-logout">Deconnexion</button>
       </div>
-    </nav>
-    <div class="container">
-      <div class="admin-grid">
-        <!-- Codes -->
-        <div class="card">
-          <div class="card-header"><h3>Codes d'acces</h3></div>
+
+      <!-- Quick view buttons -->
+      <div class="stats-row" style="margin-bottom:24px;">
+        <button class="btn btn-green btn-sm" style="width:100%;padding:14px;" onclick="switchView('dev')">&#128187; Voir Dev</button>
+        <button class="btn btn-green btn-sm" style="width:100%;padding:14px;background:#00b894;" onclick="switchView('famille')">&#127968; Voir Famille</button>
+      </div>
+
+      <!-- Codes -->
+      <div class="admin-section">
+        <h2>&#128272; Codes d'acces</h2>
+        <div class="admin-card">
           <form id="codes-form">
             <div class="form-group"><label>Code Admin</label><input type="text" id="s-admin"></div>
             <div class="form-group"><label>Code Famille</label><input type="text" id="s-famille"></div>
             <div class="form-group"><label>Code Dev</label><input type="text" id="s-dev"></div>
-            <button type="submit" class="btn btn-green btn-sm">Sauvegarder</button>
+            <button type="submit" class="btn btn-green btn-sm" style="margin-top:8px;">Sauvegarder</button>
           </form>
         </div>
-        <!-- Checklists -->
-        <div class="card">
-          <div class="card-header">
-            <h3>Checklists</h3>
-            <button class="btn btn-green btn-sm" onclick="openModal()">+ Nouvelle</button>
-          </div>
-          <div id="admin-empty" class="empty-state hidden"><p>Aucune checklist.</p></div>
-          <table class="admin-table" id="admin-table">
-            <thead><tr><th>Titre</th><th>Pour</th><th>Progression</th><th>Actions</th></tr></thead>
-            <tbody id="admin-tbody"></tbody>
-          </table>
+      </div>
+
+      <!-- Checklists -->
+      <div class="admin-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h2 style="margin:0;">&#128203; Checklists</h2>
+          <button class="btn btn-red btn-sm" onclick="openModal()">+ Nouvelle</button>
         </div>
+        <div id="admin-list"></div>
+        <div id="admin-empty" class="empty-msg hidden">Aucune checklist.</div>
+      </div>
+
+      <div class="logout-row">
+        <button class="btn btn-ghost" id="admin-logout">Deconnexion</button>
       </div>
     </div>
   </div>
@@ -241,10 +332,10 @@
           <label>Categorie</label>
           <select id="m-cat"><option value="dev">Dev</option><option value="famille">Famille</option><option value="both">Les deux</option></select>
         </div>
-        <div class="form-group"><label>Items (un par ligne)</label><textarea id="m-items" rows="6" placeholder="Task 1&#10;Task 2&#10;Task 3"></textarea></div>
+        <div class="form-group"><label>Items (un par ligne)</label><textarea id="m-items" rows="6" placeholder="Task 1&#10;Task 2&#10;Task 3" style="border-radius:14px;"></textarea></div>
         <div class="modal-actions">
-          <button type="button" class="btn btn-outline" onclick="closeModal()">Annuler</button>
-          <button type="submit" class="btn btn-green">Enregistrer</button>
+          <button type="button" class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+          <button type="submit" class="btn btn-red">Enregistrer</button>
         </div>
       </form>
     </div>
@@ -255,205 +346,263 @@
   <!-- ==================== JAVASCRIPT ==================== -->
   <script>
     // ============ STORE ============
-    const STORE_KEY = 'checklist_app_data';
+    const SK = 'checklist_v2';
     const DEFAULTS = {
       settings: { adminCode: 'admin2024', familleCode: 'famille', devCode: 'dev123' },
       checklists: [
         { id: 'd1', title: 'Sprint - Fix bugs', category: 'dev', items: [
           { text: 'Fix login page', checked: false }, { text: 'Update API endpoint', checked: true }, { text: 'Write unit tests', checked: false }
-        ], createdAt: Date.now() },
+        ]},
         { id: 'f1', title: 'Courses de la semaine', category: 'famille', items: [
           { text: 'Pain', checked: false }, { text: 'Lait', checked: true }, { text: 'Oeufs', checked: false }, { text: 'Fruits', checked: false }
-        ], createdAt: Date.now() }
+        ]}
       ]
     };
-
-    function load() { const d = localStorage.getItem(STORE_KEY); return d ? JSON.parse(d) : (save(DEFAULTS), DEFAULTS); }
-    function save(d) { localStorage.setItem(STORE_KEY, JSON.stringify(d)); }
-    function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2,5); }
-
-    function verifyCode(code) {
-      const s = load().settings;
-      if (code === s.adminCode) return 'admin';
-      if (code === s.familleCode) return 'famille';
-      if (code === s.devCode) return 'dev';
-      return null;
-    }
-
-    // Session
+    function load() { const d=localStorage.getItem(SK); return d?JSON.parse(d):(save(DEFAULTS),DEFAULTS); }
+    function save(d) { localStorage.setItem(SK,JSON.stringify(d)); }
+    function genId() { return Date.now().toString(36)+Math.random().toString(36).substr(2,5); }
+    function verifyCode(c) { const s=load().settings; if(c===s.adminCode)return'admin'; if(c===s.familleCode)return'famille'; if(c===s.devCode)return'dev'; return null; }
     function getRole() { return sessionStorage.getItem('cl_role'); }
-    function setRole(r) { sessionStorage.setItem('cl_role', r); }
+    function setRole(r) { sessionStorage.setItem('cl_role',r); }
     function clearRole() { sessionStorage.removeItem('cl_role'); }
 
-    // ============ NAVIGATION ============
-    function showPage(page) {
-      document.getElementById('page-login').classList.toggle('hidden', page !== 'login');
-      document.getElementById('page-app').classList.toggle('hidden', page !== 'app');
-      document.getElementById('page-admin').classList.toggle('hidden', page !== 'admin');
+    // ============ DATE ============
+    function formatDate() {
+      const d = new Date();
+      const days = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+      const months = ['janvier','fevrier','mars','avril','mai','juin','juillet','aout','septembre','octobre','novembre','decembre'];
+      return days[d.getDay()]+' '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();
+    }
+
+    // ============ PAGES ============
+    function showPage(p) {
+      document.getElementById('page-login').classList.toggle('hidden',p!=='login');
+      document.getElementById('page-app').classList.toggle('hidden',p!=='app');
+      document.getElementById('page-admin').classList.toggle('hidden',p!=='admin');
     }
 
     // ============ LOGIN ============
-    document.getElementById('login-form').addEventListener('submit', (e) => {
+    document.getElementById('login-form').addEventListener('submit',(e)=>{
       e.preventDefault();
-      const code = document.getElementById('code').value.trim();
-      const err = document.getElementById('login-error');
+      const code=document.getElementById('code').value.trim();
+      const err=document.getElementById('login-error');
       err.classList.remove('show');
-
-      const role = verifyCode(code);
-      if (!role) { err.textContent = 'Code incorrect.'; err.classList.add('show'); return; }
-
+      const role=verifyCode(code);
+      if(!role){err.textContent='Code incorrect.';err.classList.add('show');return;}
       setRole(role);
-      if (role === 'admin') { showPage('admin'); initAdmin(); }
-      else { showPage('app'); initApp(role); }
+      if(role==='admin'){showPage('admin');initAdmin();}
+      else{showPage('app');initApp(role);}
     });
 
     // ============ APP ============
-    let appRole = null, appCurrent = null;
+    let appRole=null, appCurrent=null, appFilter='all';
 
     function initApp(role) {
-      appRole = role;
-      const badge = document.getElementById('app-badge');
-      badge.textContent = role.charAt(0).toUpperCase() + role.slice(1);
-      badge.className = 'badge badge-' + role;
-      document.getElementById('sidebar-title').textContent = role === 'dev' ? '// Checklists Dev' : 'Checklists Famille';
-      appCurrent = null;
+      appRole=role; appFilter='all'; appCurrent=null;
+      document.getElementById('app-date').textContent=formatDate();
+      const b=document.getElementById('app-badge');
+      b.textContent=role==='dev'?'Dev':'Famille';
+      b.className='badge badge-'+role;
+      // reset filter tabs
+      document.querySelectorAll('.filter-tab').forEach(t=>t.classList.toggle('active',t.dataset.filter==='all'));
       renderApp();
     }
 
-    document.getElementById('app-logout').addEventListener('click', () => { clearRole(); showPage('login'); });
+    document.getElementById('app-logout').addEventListener('click',()=>{clearRole();showPage('login');});
+
+    // Filter tabs
+    document.querySelectorAll('.filter-tab').forEach(tab=>{
+      tab.addEventListener('click',()=>{
+        appFilter=tab.dataset.filter;
+        document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+        tab.classList.add('active');
+        renderApp();
+      });
+    });
+
+    // Add task
+    function addTask() {
+      const input=document.getElementById('add-input');
+      const text=input.value.trim();
+      if(!text||!appCurrent) return;
+      const data=load();
+      const cl=data.checklists.find(c=>c.id===appCurrent);
+      if(!cl) return;
+      cl.items.push({text,checked:false});
+      save(data); input.value=''; renderApp();
+      toast('Tache ajoutee !');
+    }
+    document.getElementById('add-btn').addEventListener('click',addTask);
+    document.getElementById('add-input').addEventListener('keydown',(e)=>{if(e.key==='Enter'){e.preventDefault();addTask();}});
 
     function renderApp() {
-      const data = load();
-      const lists = data.checklists.filter(c => c.category === appRole || c.category === 'both');
-      const sidebar = document.getElementById('sidebar-list');
-      const empty = document.getElementById('app-empty');
-      const view = document.getElementById('app-view');
-      sidebar.innerHTML = '';
+      const data=load();
+      const lists=data.checklists.filter(c=>c.category===appRole||c.category==='both');
 
-      if (!lists.length) { empty.classList.remove('hidden'); view.classList.add('hidden'); return; }
-      empty.classList.add('hidden');
+      // Checklist selector
+      const sel=document.getElementById('cl-selector');
+      sel.innerHTML='';
+      if(lists.length>1){
+        sel.classList.remove('hidden');
+        if(!appCurrent||!lists.find(c=>c.id===appCurrent)) appCurrent=lists[0].id;
+        lists.forEach(cl=>{
+          const btn=document.createElement('button');
+          btn.className='cl-tab'+(cl.id===appCurrent?' active':'');
+          btn.textContent=cl.title;
+          btn.onclick=()=>{appCurrent=cl.id;renderApp();};
+          sel.appendChild(btn);
+        });
+      } else if(lists.length===1) {
+        sel.classList.add('hidden');
+        appCurrent=lists[0].id;
+      } else {
+        sel.classList.add('hidden');
+        document.getElementById('task-list').innerHTML='';
+        document.getElementById('app-empty').classList.remove('hidden');
+        document.getElementById('stat-todo').textContent='0';
+        document.getElementById('stat-done').textContent='0';
+        return;
+      }
 
-      if (!appCurrent || !lists.find(c => c.id === appCurrent)) appCurrent = lists[0].id;
+      const cl=lists.find(c=>c.id===appCurrent);
+      if(!cl) return;
 
-      lists.forEach(cl => {
-        const li = document.createElement('li');
-        li.className = 'sidebar-item' + (cl.id === appCurrent ? ' active' : '');
-        const ck = cl.items.filter(i=>i.checked).length;
-        li.innerHTML = '<span>'+esc(cl.title)+'</span><span class="item-count">'+ck+'/'+cl.items.length+'</span>';
-        li.onclick = () => { appCurrent = cl.id; renderApp(); };
-        sidebar.appendChild(li);
-      });
+      const items=cl.items||[];
+      const todoCount=items.filter(i=>!i.checked).length;
+      const doneCount=items.filter(i=>i.checked).length;
+      document.getElementById('stat-todo').textContent=todoCount;
+      document.getElementById('stat-done').textContent=doneCount;
 
-      const cl = lists.find(c=>c.id===appCurrent);
-      view.classList.remove('hidden');
-      document.getElementById('app-title').textContent = cl.title;
-      const items = cl.items, ck = items.filter(i=>i.checked).length;
-      const pct = items.length ? Math.round(ck/items.length*100) : 0;
-      document.getElementById('app-progress').textContent = ck+'/'+items.length+' ('+pct+'%)';
-      document.getElementById('app-progress-bar').style.width = pct+'%';
+      // Filter
+      let filtered=items.map((item,i)=>({...item,idx:i}));
+      if(appFilter==='todo') filtered=filtered.filter(i=>!i.checked);
+      if(appFilter==='done') filtered=filtered.filter(i=>i.checked);
 
-      const container = document.getElementById('app-items');
-      container.innerHTML = '';
-      items.forEach((item,i) => {
-        const li = document.createElement('li');
-        li.className = 'checklist-item'+(item.checked?' checked':'');
-        li.innerHTML = '<div class="checkbox">'+(item.checked?'&#10003;':'')+'</div><span class="item-text">'+esc(item.text)+'</span>';
-        li.onclick = () => { item.checked = !item.checked; save(data); renderApp(); };
+      const container=document.getElementById('task-list');
+      const emptyEl=document.getElementById('app-empty');
+      container.innerHTML='';
+
+      if(!filtered.length){emptyEl.classList.remove('hidden');}
+      else{emptyEl.classList.add('hidden');}
+
+      filtered.forEach(item=>{
+        const li=document.createElement('li');
+        li.className='task-item'+(item.checked?' checked':'');
+
+        const check=document.createElement('div');
+        check.className='task-check';
+        check.innerHTML=item.checked?'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>':'';
+        check.onclick=(e)=>{e.stopPropagation();items[item.idx].checked=!items[item.idx].checked;save(data);renderApp();};
+
+        const text=document.createElement('span');
+        text.className='task-text';
+        text.textContent=item.text;
+
+        const del=document.createElement('button');
+        del.className='task-delete';
+        del.innerHTML='&times;';
+        del.onclick=(e)=>{e.stopPropagation();items.splice(item.idx,1);save(data);renderApp();toast('Tache supprimee.');};
+
+        li.appendChild(check);
+        li.appendChild(text);
+        li.appendChild(del);
         container.appendChild(li);
       });
     }
 
-    function switchView(role) { setRole(role); showPage('app'); initApp(role); }
+    function switchView(role){setRole(role);showPage('app');initApp(role);}
 
     // ============ ADMIN ============
-    function initAdmin() {
-      const s = load().settings;
-      document.getElementById('s-admin').value = s.adminCode;
-      document.getElementById('s-famille').value = s.familleCode;
-      document.getElementById('s-dev').value = s.devCode;
+    function initAdmin(){
+      document.getElementById('admin-date').textContent=formatDate();
+      const s=load().settings;
+      document.getElementById('s-admin').value=s.adminCode;
+      document.getElementById('s-famille').value=s.familleCode;
+      document.getElementById('s-dev').value=s.devCode;
       renderAdmin();
     }
-
-    document.getElementById('admin-logout').addEventListener('click', () => { clearRole(); showPage('login'); });
-
-    document.getElementById('codes-form').addEventListener('submit', (e) => {
+    document.getElementById('admin-logout').addEventListener('click',()=>{clearRole();showPage('login');});
+    document.getElementById('codes-form').addEventListener('submit',(e)=>{
       e.preventDefault();
-      const d = load();
-      d.settings.adminCode = document.getElementById('s-admin').value.trim();
-      d.settings.familleCode = document.getElementById('s-famille').value.trim();
-      d.settings.devCode = document.getElementById('s-dev').value.trim();
-      save(d);
-      toast('Codes sauvegardes !');
+      const d=load();
+      d.settings.adminCode=document.getElementById('s-admin').value.trim();
+      d.settings.familleCode=document.getElementById('s-famille').value.trim();
+      d.settings.devCode=document.getElementById('s-dev').value.trim();
+      save(d); toast('Codes sauvegardes !');
     });
 
-    function renderAdmin() {
-      const data = load();
-      const tbody = document.getElementById('admin-tbody');
-      const empty = document.getElementById('admin-empty');
-      const table = document.getElementById('admin-table');
-      tbody.innerHTML = '';
-
-      if (!data.checklists.length) { empty.classList.remove('hidden'); table.classList.add('hidden'); return; }
-      empty.classList.add('hidden'); table.classList.remove('hidden');
-
-      data.checklists.forEach(cl => {
-        const ck = cl.items.filter(i=>i.checked).length;
-        const cat = cl.category === 'both' ? 'Tous' : cl.category;
-        const cls = cl.category === 'both' ? 'admin' : cl.category;
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td>'+esc(cl.title)+'</td><td><span class="badge badge-'+cls+'">'+cat+'</span></td><td>'+ck+'/'+cl.items.length+'</td><td><button class="btn btn-outline btn-sm" onclick="editCl(\''+cl.id+'\')">Modifier</button> <button class="btn btn-red btn-sm" onclick="delCl(\''+cl.id+'\')">Suppr</button></td>';
-        tbody.appendChild(tr);
+    function renderAdmin(){
+      const data=load();
+      const list=document.getElementById('admin-list');
+      const empty=document.getElementById('admin-empty');
+      list.innerHTML='';
+      if(!data.checklists.length){empty.classList.remove('hidden');return;}
+      empty.classList.add('hidden');
+      data.checklists.forEach(cl=>{
+        const ck=cl.items.filter(i=>i.checked).length;
+        const cat=cl.category==='both'?'Tous':cl.category;
+        const cls=cl.category==='both'?'both':cl.category;
+        const card=document.createElement('div');
+        card.className='admin-card';
+        card.innerHTML=`
+          <div class="admin-row">
+            <div>
+              <strong>${esc(cl.title)}</strong>
+              <span class="badge badge-${cls}" style="margin-left:8px;">${cat}</span>
+            </div>
+            <div class="admin-actions">
+              <span style="color:#8888aa;font-size:0.85rem;margin-right:8px;">${ck}/${cl.items.length}</span>
+              <button class="btn btn-ghost btn-sm" onclick="editCl('${cl.id}')">Modifier</button>
+              <button class="btn btn-ghost btn-sm" style="color:#e74c6f;" onclick="delCl('${cl.id}')">Suppr</button>
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
       });
     }
 
     // Modal
-    function openModal(cl) {
-      document.getElementById('modal-title').textContent = cl ? 'Modifier' : 'Nouvelle checklist';
-      document.getElementById('m-id').value = cl ? cl.id : '';
-      document.getElementById('m-title').value = cl ? cl.title : '';
-      document.getElementById('m-cat').value = cl ? cl.category : 'dev';
-      document.getElementById('m-items').value = cl ? cl.items.map(i=>i.text).join('\n') : '';
+    function openModal(cl){
+      document.getElementById('modal-title').textContent=cl?'Modifier':'Nouvelle checklist';
+      document.getElementById('m-id').value=cl?cl.id:'';
+      document.getElementById('m-title').value=cl?cl.title:'';
+      document.getElementById('m-cat').value=cl?cl.category:'dev';
+      document.getElementById('m-items').value=cl?cl.items.map(i=>i.text).join('\n'):'';
       document.getElementById('modal').classList.add('show');
     }
-    function closeModal() { document.getElementById('modal').classList.remove('show'); }
-    document.getElementById('modal').onclick = (e) => { if(e.target===e.currentTarget) closeModal(); };
+    function closeModal(){document.getElementById('modal').classList.remove('show');}
+    document.getElementById('modal').onclick=(e)=>{if(e.target===e.currentTarget)closeModal();};
 
-    document.getElementById('modal-form').addEventListener('submit', (e) => {
+    document.getElementById('modal-form').addEventListener('submit',(e)=>{
       e.preventDefault();
-      const data = load();
-      const id = document.getElementById('m-id').value;
-      const title = document.getElementById('m-title').value.trim();
-      const cat = document.getElementById('m-cat').value;
-      const lines = document.getElementById('m-items').value.split('\n').map(l=>l.trim()).filter(l=>l);
-
-      if (id) {
-        const cl = data.checklists.find(c=>c.id===id);
-        if (cl) {
-          const old = cl.items;
-          cl.title = title; cl.category = cat;
-          cl.items = lines.map(t => { const ex = old.find(o=>o.text===t); return { text: t, checked: ex?ex.checked:false }; });
-        }
+      const data=load(), id=document.getElementById('m-id').value;
+      const title=document.getElementById('m-title').value.trim();
+      const cat=document.getElementById('m-cat').value;
+      const lines=document.getElementById('m-items').value.split('\n').map(l=>l.trim()).filter(l=>l);
+      if(id){
+        const cl=data.checklists.find(c=>c.id===id);
+        if(cl){const old=cl.items;cl.title=title;cl.category=cat;cl.items=lines.map(t=>{const ex=old.find(o=>o.text===t);return{text:t,checked:ex?ex.checked:false};});}
       } else {
-        data.checklists.push({ id: genId(), title, category: cat, items: lines.map(t=>({text:t,checked:false})), createdAt: Date.now() });
+        data.checklists.push({id:genId(),title,category:cat,items:lines.map(t=>({text:t,checked:false}))});
       }
-      save(data); closeModal(); renderAdmin(); toast(id ? 'Checklist mise a jour !' : 'Checklist creee !');
+      save(data);closeModal();renderAdmin();toast(id?'Mise a jour !':'Checklist creee !');
     });
 
-    function editCl(id) { const cl = load().checklists.find(c=>c.id===id); if(cl) openModal(cl); }
-    function delCl(id) { if(!confirm('Supprimer ?')) return; const d=load(); d.checklists=d.checklists.filter(c=>c.id!==id); save(d); renderAdmin(); toast('Supprimee.'); }
+    function editCl(id){const cl=load().checklists.find(c=>c.id===id);if(cl)openModal(cl);}
+    function delCl(id){if(!confirm('Supprimer ?'))return;const d=load();d.checklists=d.checklists.filter(c=>c.id!==id);save(d);renderAdmin();toast('Supprimee.');}
 
     // ============ UTILS ============
-    function esc(t) { const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
-    function toast(msg,err) {
-      const t=document.createElement('div'); t.className='toast'+(err?' error':''); t.textContent=msg;
-      document.getElementById('toast-container').appendChild(t); setTimeout(()=>t.remove(),3000);
+    function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
+    function toast(msg,err){
+      const t=document.createElement('div');t.className='toast'+(err?' error':'');t.textContent=msg;
+      document.getElementById('toast-container').appendChild(t);setTimeout(()=>t.remove(),3000);
     }
 
     // ============ INIT ============
-    const savedRole = getRole();
-    if (savedRole === 'admin') { showPage('admin'); initAdmin(); }
-    else if (savedRole) { showPage('app'); initApp(savedRole); }
-    else { showPage('login'); }
+    const sr=getRole();
+    if(sr==='admin'){showPage('admin');initAdmin();}
+    else if(sr){showPage('app');initApp(sr);}
+    else showPage('login');
   </script>
 </body>
 </html>
