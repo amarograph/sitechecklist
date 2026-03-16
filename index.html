@@ -71,13 +71,14 @@
     .header-icon { font-size: 1.8rem; margin-right: 10px; }
 
     /* ===== STATS ===== */
-    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
     .stat-card {
       background: #222244; border-radius: 16px; padding: 16px 20px; text-align: center;
       border: 1px solid #2a2a4a;
     }
     .stat-number { font-size: 1.8rem; font-weight: 700; }
     .stat-number.todo { color: #e74c6f; }
+    .stat-number.inprogress { color: #f39c12; }
     .stat-number.done { color: #00b894; }
     .stat-label { font-size: 0.8rem; color: #8888aa; margin-top: 2px; }
 
@@ -132,6 +133,7 @@
     .task-item:hover { border-color: #444466; }
     .task-item.checked { opacity: 0.5; }
     .task-item.checked .task-text { text-decoration: line-through; color: #666688; }
+    .task-item.inprogress { border-color: #f39c12; }
 
     .task-check {
       width: 26px; height: 26px; border-radius: 50%; border: 2px solid #444466;
@@ -140,6 +142,9 @@
     }
     .task-item.checked .task-check {
       background: #00b894; border-color: #00b894; color: white;
+    }
+    .task-item.inprogress .task-check {
+      background: #f39c12; border-color: #f39c12; color: white;
     }
     .task-check svg { width: 14px; height: 14px; }
 
@@ -240,6 +245,10 @@
           <div class="stat-label">A faire</div>
         </div>
         <div class="stat-card">
+          <div class="stat-number inprogress" id="stat-inprogress">0</div>
+          <div class="stat-label">En cours</div>
+        </div>
+        <div class="stat-card">
           <div class="stat-number done" id="stat-done">0</div>
           <div class="stat-label">Terminees</div>
         </div>
@@ -258,6 +267,7 @@
       <div class="filter-tabs">
         <button class="filter-tab active" data-filter="all">Toutes</button>
         <button class="filter-tab" data-filter="todo">A faire</button>
+        <button class="filter-tab" data-filter="inprogress">En cours</button>
         <button class="filter-tab" data-filter="done">Terminees</button>
       </div>
 
@@ -351,14 +361,26 @@
       settings: { adminCode: 'admin2024', familleCode: 'famille', devCode: 'dev123' },
       checklists: [
         { id: 'd1', title: 'Sprint - Fix bugs', category: 'dev', items: [
-          { text: 'Fix login page', checked: false }, { text: 'Update API endpoint', checked: true }, { text: 'Write unit tests', checked: false }
+          { text: 'Fix login page', status: 'todo' }, { text: 'Update API endpoint', status: 'done' }, { text: 'Write unit tests', status: 'inprogress' }
         ]},
         { id: 'f1', title: 'Courses de la semaine', category: 'famille', items: [
-          { text: 'Pain', checked: false }, { text: 'Lait', checked: true }, { text: 'Oeufs', checked: false }, { text: 'Fruits', checked: false }
+          { text: 'Pain', status: 'todo' }, { text: 'Lait', status: 'done' }, { text: 'Oeufs', status: 'inprogress' }, { text: 'Fruits', status: 'todo' }
         ]}
       ]
     };
-    function load() { const d=localStorage.getItem(SK); return d?JSON.parse(d):(save(DEFAULTS),DEFAULTS); }
+    // Migrate old data (checked boolean -> status string)
+    function migrate(data) {
+      data.checklists.forEach(cl => {
+        cl.items.forEach(item => {
+          if (item.status === undefined) {
+            item.status = item.checked ? 'done' : 'todo';
+            delete item.checked;
+          }
+        });
+      });
+      return data;
+    }
+    function load() { const d=localStorage.getItem(SK); if(d){const p=JSON.parse(d);return migrate(p);} save(DEFAULTS); return DEFAULTS; }
     function save(d) { localStorage.setItem(SK,JSON.stringify(d)); }
     function genId() { return Date.now().toString(36)+Math.random().toString(36).substr(2,5); }
     function verifyCode(c) { const s=load().settings; if(c===s.adminCode)return'admin'; if(c===s.familleCode)return'famille'; if(c===s.devCode)return'dev'; return null; }
@@ -428,7 +450,7 @@
       const data=load();
       const cl=data.checklists.find(c=>c.id===appCurrent);
       if(!cl) return;
-      cl.items.push({text,checked:false});
+      cl.items.push({text,status:'todo'});
       save(data); input.value=''; renderApp();
       toast('Tache ajoutee !');
     }
@@ -468,15 +490,18 @@
       if(!cl) return;
 
       const items=cl.items||[];
-      const todoCount=items.filter(i=>!i.checked).length;
-      const doneCount=items.filter(i=>i.checked).length;
+      const todoCount=items.filter(i=>i.status==='todo').length;
+      const ipCount=items.filter(i=>i.status==='inprogress').length;
+      const doneCount=items.filter(i=>i.status==='done').length;
       document.getElementById('stat-todo').textContent=todoCount;
+      document.getElementById('stat-inprogress').textContent=ipCount;
       document.getElementById('stat-done').textContent=doneCount;
 
       // Filter
       let filtered=items.map((item,i)=>({...item,idx:i}));
-      if(appFilter==='todo') filtered=filtered.filter(i=>!i.checked);
-      if(appFilter==='done') filtered=filtered.filter(i=>i.checked);
+      if(appFilter==='todo') filtered=filtered.filter(i=>i.status==='todo');
+      if(appFilter==='inprogress') filtered=filtered.filter(i=>i.status==='inprogress');
+      if(appFilter==='done') filtered=filtered.filter(i=>i.status==='done');
 
       const container=document.getElementById('task-list');
       const emptyEl=document.getElementById('app-empty');
@@ -485,14 +510,22 @@
       if(!filtered.length){emptyEl.classList.remove('hidden');}
       else{emptyEl.classList.add('hidden');}
 
+      const nextStatus = { todo: 'inprogress', inprogress: 'done', done: 'todo' };
+      const statusIcons = {
+        todo: '',
+        inprogress: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M12 6v6l4 2"/></svg>',
+        done: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>'
+      };
+
       filtered.forEach(item=>{
         const li=document.createElement('li');
-        li.className='task-item'+(item.checked?' checked':'');
+        li.className='task-item'+(item.status==='done'?' checked':'')+(item.status==='inprogress'?' inprogress':'');
 
         const check=document.createElement('div');
         check.className='task-check';
-        check.innerHTML=item.checked?'<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>':'';
-        check.onclick=(e)=>{e.stopPropagation();items[item.idx].checked=!items[item.idx].checked;save(data);renderApp();};
+        check.innerHTML=statusIcons[item.status];
+        check.title='Clic: '+{todo:'En cours',inprogress:'Terminee',done:'A faire'}[item.status];
+        check.onclick=(e)=>{e.stopPropagation();items[item.idx].status=nextStatus[item.status];save(data);renderApp();};
 
         const text=document.createElement('span');
         text.className='task-text';
@@ -539,7 +572,7 @@
       if(!data.checklists.length){empty.classList.remove('hidden');return;}
       empty.classList.add('hidden');
       data.checklists.forEach(cl=>{
-        const ck=cl.items.filter(i=>i.checked).length;
+        const ck=cl.items.filter(i=>i.status==='done').length;
         const cat=cl.category==='both'?'Tous':cl.category;
         const cls=cl.category==='both'?'both':cl.category;
         const card=document.createElement('div');
@@ -581,9 +614,9 @@
       const lines=document.getElementById('m-items').value.split('\n').map(l=>l.trim()).filter(l=>l);
       if(id){
         const cl=data.checklists.find(c=>c.id===id);
-        if(cl){const old=cl.items;cl.title=title;cl.category=cat;cl.items=lines.map(t=>{const ex=old.find(o=>o.text===t);return{text:t,checked:ex?ex.checked:false};});}
+        if(cl){const old=cl.items;cl.title=title;cl.category=cat;cl.items=lines.map(t=>{const ex=old.find(o=>o.text===t);return{text:t,status:ex?ex.status:'todo'};});}
       } else {
-        data.checklists.push({id:genId(),title,category:cat,items:lines.map(t=>({text:t,checked:false}))});
+        data.checklists.push({id:genId(),title,category:cat,items:lines.map(t=>({text:t,status:'todo'}))});
       }
       save(data);closeModal();renderAdmin();toast(id?'Mise a jour !':'Checklist creee !');
     });
