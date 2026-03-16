@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init:*)",
+      "Bash(git remote:*)",
+      "Bash(mkdir -p css js)",
+      "Bash(npm install:*)",
+      "Bash(firebase login:*)",
+      "Bash(gh api:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where npx:*)"
+    ]
+  }
+}

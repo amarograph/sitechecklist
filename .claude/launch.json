@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "site",
+      "runtimeExecutable": "C:\\Program Files\\npx.cmd",
+      "runtimeArgs": ["serve", "D:/sitechecklist", "-l", "3000", "--no-clipboard"],
+      "port": 3000
+    }
+  ]
+}
