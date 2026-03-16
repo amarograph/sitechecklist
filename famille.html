@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Espace Famille</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root {
+      --theme: #00b894;
+      --theme-dark: #00a381;
+      --theme-light: #55efc4;
+      --theme-bg: #f0fff4;
+      --theme-gradient: linear-gradient(135deg, #00b894 0%, #55efc4 100%);
+    }
+
+    body { background: var(--theme-bg); }
+
+    .navbar {
+      background: var(--theme-gradient);
+      border-bottom: none;
+    }
+    .navbar-brand { color: white; font-size: 1.5rem; }
+    .navbar-brand span { font-size: 1.6rem; }
+    .btn-logout {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+    .btn-logout:hover { background: rgba(255,255,255,0.3); }
+
+    .welcome-banner {
+      background: var(--theme-gradient);
+      color: white;
+      padding: 30px;
+      border-radius: 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+    }
+    .welcome-banner h2 { font-size: 1.6rem; margin-bottom: 4px; }
+    .welcome-banner p { opacity: 0.9; font-size: 0.95rem; }
+
+    .sidebar {
+      background: white;
+      border: 2px solid var(--theme-light);
+    }
+    .sidebar-item.active {
+      background: var(--theme);
+      color: white;
+    }
+    .sidebar-item:hover:not(.active) { background: var(--theme-bg); }
+
+    .checklist-item:hover { border-left: 3px solid var(--theme); }
+    .checklist-item.checked .custom-checkbox {
+      background: var(--theme);
+      border-color: var(--theme);
+    }
+
+    .progress-fill { background: var(--theme); }
+
+    .card { border: 1px solid var(--theme-light); }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="famille.html" class="navbar-brand"><span>&#127968;</span> Espace Famille</a>
+    <button class="btn btn-logout btn-sm" id="logout-btn">Deconnexion</button>
+  </nav>
+
+  <div class="container">
+    <div class="welcome-banner">
+      <h2>&#128075; Bienvenue dans l'espace Famille !</h2>
+      <p>Retrouve ici toutes les checklists de la famille.</p>
+    </div>
+
+    <div class="app-layout">
+      <aside class="sidebar" id="sidebar">
+        <p class="sidebar-title">Nos Checklists</p>
+        <ul id="checklist-list" class="sidebar-list"></ul>
+      </aside>
+
+      <main id="main-content">
+        <div id="empty-state" class="empty-state hidden">
+          <h3>&#128203; Aucune checklist</h3>
+          <p>Aucune checklist famille pour le moment.</p>
+        </div>
+
+        <div id="checklist-view" class="card hidden">
+          <div class="checklist-header">
+            <h2 id="checklist-title"></h2>
+            <span id="checklist-progress-text"></span>
+          </div>
+          <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+          </div>
+          <ul id="checklist-items" class="checklist-items mt-2"></ul>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="js/store.js"></script>
+  <script>
+    const role = getSession();
+    if (!role || (role !== 'famille' && role !== 'admin')) {
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      clearSession();
+      window.location.href = 'index.html';
+    });
+
+    let currentChecklistId = null;
+
+    function render() {
+      const checklists = getChecklists('famille');
+      const list = document.getElementById('checklist-list');
+      const emptyState = document.getElementById('empty-state');
+      const checklistView = document.getElementById('checklist-view');
+
+      list.innerHTML = '';
+
+      if (checklists.length === 0) {
+        emptyState.classList.remove('hidden');
+        checklistView.classList.add('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      if (!currentChecklistId || !checklists.find(c => c.id === currentChecklistId)) {
+        currentChecklistId = checklists[0].id;
+      }
+
+      checklists.forEach(cl => {
+        const li = document.createElement('li');
+        li.className = 'sidebar-item' + (cl.id === currentChecklistId ? ' active' : '');
+        const checked = (cl.items || []).filter(i => i.checked).length;
+        li.innerHTML = '<span>' + esc(cl.title) + '</span><span class="item-count">' + checked + '/' + cl.items.length + '</span>';
+        li.addEventListener('click', () => { currentChecklistId = cl.id; render(); });
+        list.appendChild(li);
+      });
+
+      const cl = checklists.find(c => c.id === currentChecklistId);
+      if (!cl) return;
+
+      checklistView.classList.remove('hidden');
+      document.getElementById('checklist-title').textContent = cl.title;
+
+      const items = cl.items || [];
+      const checked = items.filter(i => i.checked).length;
+      const pct = items.length > 0 ? Math.round((checked / items.length) * 100) : 0;
+      document.getElementById('checklist-progress-text').textContent = checked + '/' + items.length + ' (' + pct + '%)';
+      document.getElementById('progress-fill').style.width = pct + '%';
+
+      const container = document.getElementById('checklist-items');
+      container.innerHTML = '';
+
+      items.forEach((item, i) => {
+        const li = document.createElement('li');
+        li.className = 'checklist-item' + (item.checked ? ' checked' : '');
+        li.innerHTML = '<div class="custom-checkbox">' + (item.checked ? '&#10003;' : '') + '</div><span class="item-text">' + esc(item.text) + '</span>';
+        li.addEventListener('click', () => { toggleItem(cl.id, i); render(); });
+        container.appendChild(li);
+      });
+    }
+
+    function esc(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+    render();
+  </script>
+</body>
+</html>

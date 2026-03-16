@@ -28,10 +28,17 @@
 
   <script src="js/store.js"></script>
   <script>
+    function goToPage(role) {
+      if (role === 'admin') return 'admin.html';
+      if (role === 'famille') return 'famille.html';
+      if (role === 'dev') return 'dev.html';
+      return 'index.html';
+    }
+
     // Vérifier si déjà connecté
     const session = getSession();
     if (session) {
-      window.location.href = session === 'admin' ? 'admin.html' : 'app.html';
+      window.location.href = goToPage(session);
     }
 
     document.getElementById('login-form').addEventListener('submit', (e) => {
@@ -54,12 +61,7 @@
       }
 
       setSession(role);
-
-      if (role === 'admin') {
-        window.location.href = 'admin.html';
-      } else {
-        window.location.href = 'app.html';
-      }
+      window.location.href = goToPage(role);
     });
   </script>
 </body>
